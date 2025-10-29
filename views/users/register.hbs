@@ -1,0 +1,297 @@
+<form action="/users/register" method="POST" novalidate class="register-card" aria-describedby="form-help">
+    <h2 class="card-title">Create account</h2>
+
+    {{!-- Server-side flash/errors --}}
+    {{#if errors}}
+        <div class="server-errors" role="alert" aria-live="polite">
+            <strong>Fix the following:</strong>
+            <ul>
+                {{#each errors}}
+                    <li>{{this.msg}}</li>
+                {{/each}}
+            </ul>
+        </div>
+    {{/if}}
+
+    <div class="grid">
+        <div class="form-row">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" required value="{{username}}" aria-describedby="username-help" />
+            <div id="username-help" class="field-help" aria-live="polite"></div>
+        </div>
+
+        <div class="form-row">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" minlength="8" required aria-describedby="pw-help pw-strength" />
+            <div id="pw-help" class="field-help">Minimum 8 characters.</div>
+            <div id="pw-strength" class="strength" aria-hidden="true">
+                <div class="strength-bar"></div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label for="password2">Confirm password</label>
+            <input id="password2" name="password2" type="password" minlength="8" required aria-describedby="pw-match" />
+            <div id="pw-match" class="field-help" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button type="submit" id="submit-btn" class="primary" disabled>Register</button>
+        <button type="button" id="clear-btn" class="secondary">Clear</button>
+    </div>
+
+    <div id="form-help" class="muted">Passwords are checked locally; the server will also validate before creating an account.</div>
+</form>
+
+<script>
+    (function () {
+        const form = document.querySelector('.register-card');
+        const usernameEl = document.getElementById('username');
+        const pw = document.getElementById('password');
+        const pw2 = document.getElementById('password2');
+        const usernameHelp = document.getElementById('username-help');
+        const pwHelp = document.getElementById('pw-help');
+        const pwMatch = document.getElementById('pw-match');
+        const strengthBar = document.querySelector('.strength-bar');
+        const submit = document.getElementById('submit-btn');
+        const clearBtn = document.getElementById('clear-btn');
+
+        function setInvalid(el, msgEl, message) {
+            el.classList.add('invalid');
+            el.setAttribute('aria-invalid', 'true');
+            msgEl.textContent = message || '';
+        }
+
+        function setValid(el, msgEl, message) {
+            el.classList.remove('invalid');
+            el.setAttribute('aria-invalid', 'false');
+            msgEl.textContent = message || '';
+        }
+
+        function passwordStrength(val) {
+            let score = 0;
+            if (val.length >= 8) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+            return score; // 0..4
+        }
+
+        function updateStrength(val) {
+            const score = passwordStrength(val);
+            const pct = (score / 4) * 100;
+            strengthBar.style.width = pct + '%';
+            strengthBar.dataset.score = score;
+        }
+
+        function validateAll() {
+            let ok = true;
+
+            // Username
+            if (!usernameEl.value.trim()) {
+                setInvalid(usernameEl, usernameHelp, 'Please enter a username.');
+                ok = false;
+            } else {
+                setValid(usernameEl, usernameHelp, '');
+            }
+
+            // Password length
+            if (!pw.value) {
+                setInvalid(pw, pwHelp, 'Password required.');
+                ok = false;
+            } else if (pw.value.length < 8) {
+                setInvalid(pw, pwHelp, 'Password must be at least 8 characters.');
+                ok = false;
+            } else {
+                setValid(pw, pwHelp, '');
+            }
+
+            // Match
+            if (!pw2.value) {
+                setInvalid(pw2, pwMatch, 'Please confirm your password.');
+                ok = false;
+            } else if (pw.value !== pw2.value) {
+                setInvalid(pw2, pwMatch, 'Passwords do not match.');
+                setInvalid(pw, pwHelp, 'Passwords do not match.');
+                ok = false;
+            } else {
+                setValid(pw2, pwMatch, '');
+                if (pw.value && pw.value.length >= 8) setValid(pw, pwHelp, '');
+            }
+
+            submit.disabled = !ok;
+            return ok;
+        }
+
+        // Live handlers
+        usernameEl.addEventListener('input', () => { validateAll(); });
+        pw.addEventListener('input', () => {
+            updateStrength(pw.value);
+            validateAll();
+        });
+        pw2.addEventListener('input', () => { validateAll(); });
+
+        // Clear button
+        clearBtn.addEventListener('click', () => {
+            [usernameEl, pw, pw2].forEach(i => i.value = '');
+            document.querySelectorAll('.field-help').forEach(h => h.textContent = '');
+            document.querySelectorAll('input').forEach(i => i.classList.remove('invalid'));
+            updateStrength('');
+            submit.disabled = true;
+        });
+
+        form.addEventListener('submit', function (e) {
+            if (!validateAll()) {
+                e.preventDefault();
+            }
+        });
+
+        // Initialize
+        updateStrength(pw.value || '');
+        validateAll();
+    })();
+</script>
+
+<style>
+    :root {
+        --bg: #fff;
+        --card-bg: #f7f9fb;
+        --primary: #0b70e1;
+        --muted: #6b7280;
+        --danger: #b00020;
+        --success: #0bba7a;
+        --radius: 10px;
+    }
+
+    .register-card {
+        max-width: 720px;
+        margin: 1.5rem auto;
+        padding: 1.25rem;
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        box-shadow: 0 6px 20px rgba(12, 22, 38, 0.08);
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    .card-title {
+        margin: 0 0 1rem;
+        font-size: 1.25rem;
+        color: #0f1724;
+    }
+
+    .server-errors {
+        background: #fff0f0;
+        border: 1px solid rgba(176,0,32,0.12);
+        padding: .6rem .8rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        color: var(--danger);
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.9rem;
+    }
+
+    .form-row {
+        display:flex;
+        flex-direction:column;
+    }
+
+    .form-row label {
+        font-weight:600;
+        margin-bottom:.35rem;
+        color:#0f1724;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        padding: .6rem;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        background: var(--bg);
+        outline: none;
+        transition: box-shadow .12s, border-color .12s;
+    }
+
+    input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(11,112,225,0.08);
+    }
+
+    input.invalid {
+        border-color: var(--danger);
+        box-shadow: 0 0 0 3px rgba(176,0,32,0.06);
+    }
+
+    .field-help {
+        margin-top:.35rem;
+        font-size:.9rem;
+        color:var(--muted);
+        min-height:1.1em;
+    }
+
+    .strength {
+        height:8px;
+        background: #e6eefb;
+        border-radius: 6px;
+        margin-top:.5rem;
+        overflow:hidden;
+    }
+
+    .strength-bar {
+        height:100%;
+        width:0%;
+        background: linear-gradient(90deg,#ff4d4f,#ffb020);
+        transition: width .18s ease;
+    }
+
+    .strength-bar[data-score="1"] { background: #ff6b6b; }
+    .strength-bar[data-score="2"] { background: #ffb020; }
+    .strength-bar[data-score="3"] { background: #66cc66; }
+    .strength-bar[data-score="4"] { background: var(--success); }
+
+    .actions {
+        margin-top: 1rem;
+        display:flex;
+        gap:.6rem;
+        align-items:center;
+    }
+
+    button {
+        padding:.6rem .9rem;
+        border-radius:8px;
+        border: none;
+        cursor:pointer;
+        font-weight:600;
+    }
+
+    .primary {
+        background: var(--primary);
+        color: #fff;
+    }
+
+    .primary:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+
+    .secondary {
+        background: transparent;
+        border: 1px solid #d1d5db;
+        color: #0f1724;
+    }
+
+    .muted {
+        color: var(--muted);
+        font-size:.9rem;
+        margin-top:.75rem;
+    }
+
+    @media (max-width:720px) {
+        .grid { grid-template-columns: 1fr; }
+    }
+</style>

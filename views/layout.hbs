@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{title}}</title>
+    <!-- Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  </head>
+  <body>
+    {{!-- Page header --}}
+    <nav class="blue">
+      <div class="nav-wrapper">
+        <a href="/" class="brand-logo center">My App</a>
+        <ul id="nav-mobile" class="left">
+          <li><a href="/home"><i class="material-icons left">home</i>Home</a></li>
+          <li><a href="/product"><i class="material-icons left">shopping_cart</i>Product</a></li>
+          <li><a href="/category"><i class="material-icons left">category</i>Category</a></li>
+        </ul>
+        <ul class="right">
+          <li><a href="/users/logout"><i class="material-icons left">logout</i>Logout {{{ username }}}</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    {{!-- Page content --}}
+    <div class="container">
+      <div class="row">
+        {{{body}}}
+      </div>
+    </div>
+
+    <!-- Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  </body>
+</html>

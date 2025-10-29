@@ -1,0 +1,89 @@
+{{!-- views/users/login.hbs -- copy of auth/login for compatibility --}}
+<div class="auth-page">
+    <main class="auth-card" role="main" aria-labelledby="login-heading">
+        <h1 id="login-heading">Log in to your account</h1>
+
+        {{#if success}}
+            <div class="flash flash-success" role="status">{{success}}</div>
+        {{/if}}
+        {{#if error}}
+            <div class="flash flash-error" role="alert">{{error}}</div>
+        {{/if}}
+        {{#if errors}}
+            {{#if (isArray errors)}}
+                <ul class="flash-list flash-error" role="alert">
+                    {{#each errors}}
+                        <li>{{this.msg}}</li>
+                    {{/each}}
+                </ul>
+            {{else}}
+                <div class="flash flash-error" role="alert">{{errors}}</div>
+            {{/if}}
+        {{/if}}
+
+        <form action="/users/login" method="post" novalidate>
+            {{#if csrfToken}}
+                <input type="hidden" name="_csrf" value="{{csrfToken}}">
+            {{/if}}
+
+            <div class="form-row">
+                <label for="username">Username</label>
+                <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    autocomplete="username"
+                    required
+                    value="{{username}}"
+                    aria-describedby="{{#if errors.username}}username-error{{/if}}"
+                >
+                {{#if errors.username}}
+                    <div id="username-error" class="field-error">{{errors.username.msg}}</div>
+                {{/if}}
+            </div>
+
+            <div class="form-row">
+                <label for="password">Password</label>
+                <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autocomplete="current-password"
+                    required
+                    aria-describedby="{{#if errors.password}}password-error{{/if}}"
+                >
+                {{#if errors.password}}
+                    <div id="password-error" class="field-error">{{errors.password.msg}}</div>
+                {{/if}}
+            </div>
+
+            <div class="form-row form-row-inline">
+                <a class="link" href="/users/forgot">Forgot your password?</a>
+            </div>
+
+            <div class="form-row">
+                <button type="submit" class="btn btn-primary">Log in</button>
+            </div>
+
+            <p class="muted">
+                Don't have an account?
+                <a href="/users/register">Sign up</a>.
+            </p>
+        </form>
+    </main>
+</div>
+
+<style>
+.auth-page{display:flex;align-items:center;justify-content:center;padding:3rem}
+.auth-card{max-width:420px;width:100%;border:1px solid #e6e6e6;padding:1.5rem;border-radius:6px;background:#fff}
+.form-row{margin-bottom:0.75rem}
+.form-row-inline{display:flex;justify-content:space-between;align-items:center}
+label{display:block;margin-bottom:0.25rem;font-weight:600}
+input[type="text"],input[type="password"]{width:100%;padding:0.5rem;border:1px solid #ccc;border-radius:4px}
+.btn-primary{display:inline-block;padding:0.6rem 1rem;background:#0366d6;color:#fff;border-radius:4px;border:none;cursor:pointer}
+.field-error{color:#b00020;font-size:0.9rem;margin-top:0.25rem}
+.flash{padding:0.6rem;border-radius:4px;margin-bottom:0.75rem}
+.flash-success{background:#e6ffed;border:1px solid #bdeac8}
+.flash-error{background:#ffebeb;border:1px solid #f2c2c2}
+.muted{color:#666;font-size:0.9rem}
+</style>

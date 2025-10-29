@@ -1,0 +1,67 @@
+<div class="row">
+    <div class="col s12 m8 offset-m2">
+        <h3>Edit Product</h3>
+        
+        <form action="/product/edit/{{product._id}}" method="POST" enctype="multipart/form-data" style="margin-top: 30px;">
+            <div class="input-field">
+                <i class="material-icons prefix">label</i>
+                <input type="text" id="name" name="name" value="{{product.name}}" required>
+                <label for="name" class="active">Product Name</label>
+            </div>
+
+            <div class="input-field">
+                <i class="material-icons prefix">attach_money</i>
+                <input type="number" id="price" name="price" value="{{product.price}}" required>
+                <label for="price" class="active">Price</label>
+            </div>
+
+            {{#if product.image}}
+            <div class="row">
+                <div class="col s12">
+                    <p><strong>Current Image:</strong></p>
+                    <img src="{{product.image}}" alt="{{product.name}}" style="max-width: 200px; max-height: 200px; margin-bottom: 20px;">
+                </div>
+            </div>
+            {{/if}}
+
+            <div class="file-field input-field">
+                <div class="btn blue">
+                    <span><i class="material-icons left">image</i>Change Image</span>
+                    <input type="file" name="image" accept="image/*">
+                </div>
+                <div class="file-path-wrapper">
+                    <input class="file-path validate" type="text" placeholder="Choose new product image (optional)">
+                </div>
+            </div>
+
+            <div class="input-field">
+                <i class="material-icons prefix">category</i>
+                <select name="category" id="category" required>
+                    <option value="" disabled>Choose Category</option>
+                    {{#each categoryList}}
+                    <option value="{{this._id}}" {{#if this.selected}}selected{{/if}}>{{this.name}}</option>
+                    {{/each}}
+                </select>
+                <label>Category</label>
+            </div>
+
+            <div class="row" style="margin-top: 30px;">
+                <div class="col s12">
+                    <button type="submit" class="btn waves-effect waves-light blue">
+                        <i class="material-icons left">save</i>Update Product
+                    </button>
+                    <a href="/product" class="btn waves-effect waves-light grey">
+                        <i class="material-icons left">cancel</i>Cancel
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var elems = document.querySelectorAll('select');
+        M.FormSelect.init(elems);
+    });
+</script>
