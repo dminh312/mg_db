@@ -5,6 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
 var session = require('express-session');
+var cors = require('cors');
 
 
 mongoose.connect('mongodb://localhost:27017/web', { useNewUrlParser: true, useUnifiedTopology: true })
@@ -48,8 +49,12 @@ app.use(session({
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/home', homeRouter);
-// RESTful API routes
-app.use('/api', apiRouter);
+// RESTful API routes - enable CORS for cross-origin API requests
+const corsOptions = {
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
+  credentials: true
+};
+app.use('/api', cors(corsOptions), apiRouter);
 // protect category and product routes so only logged-in users can access
 app.use('/category', authMiddleware.ensureAuthenticated, categoryRouter);
 app.use('/product', authMiddleware.ensureAuthenticated, productRouter);
