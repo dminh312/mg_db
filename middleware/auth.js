@@ -1,10 +1,12 @@
 // middleware/auth.js
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production';
+
 module.exports = {
   ensureAuthenticated: function (req, res, next) {
     if (req && req.session && req.session.userId) {
       return next();
     }
-    // remember original URL to return after login
     if (req && req.session) req.session.returnTo = req.originalUrl || '/';
     return res.redirect('/users/login');
   },
@@ -14,19 +16,26 @@ module.exports = {
       if (req.session.role === 'admin') {
         return next();
       }
-      // User is authenticated but not admin
       return res.status(403).render('error', { 
         message: 'Access Denied', 
         error: { status: 403, stack: 'You do not have permission to access this resource.' }
       });
     }
-    // Not authenticated at all
     if (req && req.session) req.session.returnTo = req.originalUrl || '/';
     return res.redirect('/users/login');
   },
 
-  // API-specific middleware - returns JSON instead of redirecting
   ensureAuthenticatedAPI: function (req, res, next) {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+        return next();
+      } catch (err) {
+        console.log('❌ Invalid JWT token:', err.message);
+      }
+    }
     if (req && req.session && req.session.userId) {
       return next();
     }
@@ -37,41 +46,48 @@ module.exports = {
   },
 
   ensureAdminAPI: function (req, res, next) {
-    console.log('🔒 Auth check - Session:', {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        console.log('🔒 JWT Auth check:', decoded);
+        if (decoded.role !== 'admin') {
+          console.log('❌ User is not admin:', decoded.role);
+          return res.status(403).json({
+            success: false,
+            message: 'Admin access required. You do not have permission.'
+          });
+        }
+        req.user = decoded;
+        console.log('✅ Admin access granted via JWT for:', decoded.username);
+        return next();
+      } catch (err) {
+        console.log('❌ JWT verification failed:', err.message);
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid or expired token. Please login again.'
+        });
+      }
+    }
+    console.log('🔒 Session Auth check:', {
       userId: req.session?.userId,
-      username: req.session?.username,
-      role: req.session?.role,
-      sessionID: req.sessionID,
-      cookies: req.cookies,
-      hasSession: !!req.session
+      role: req.session?.role
     });
-
     if (!req.session || !req.session.userId) {
-      console.log('❌ No session found - Authentication required');
+      console.log('❌ No session found');
       return res.status(401).json({
         success: false,
-        message: 'Authentication required. Please login.',
-        debug: {
-          hasSession: !!req.session,
-          hasUserId: !!req.session?.userId,
-          sessionID: req.sessionID
-        }
+        message: 'Authentication required. Please login.'
       });
     }
-
     if (req.session.role !== 'admin') {
       console.log('❌ User is not admin:', req.session.role);
       return res.status(403).json({
         success: false,
-        message: 'Admin access required. You do not have permission.',
-        debug: {
-          currentRole: req.session.role,
-          requiredRole: 'admin'
-        }
+        message: 'Admin access required. You do not have permission.'
       });
     }
-
-    console.log('✅ Admin access granted for:', req.session.username);
+    console.log('✅ Admin access granted via session for:', req.session.username);
     return next();
   }
 };

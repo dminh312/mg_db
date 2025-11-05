@@ -5,6 +5,9 @@ var CategoryModel = require('../models/CategoryModel');
 var UserModel = require('../models/UserModel');
 var authMiddleware = require('../middleware/auth');
 var bcrypt = require('bcrypt');
+var jwt = require('jsonwebtoken');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production';
 
 // Auth endpoints
 router.post('/login', async (req, res) => {
@@ -31,7 +34,18 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ success: false, message: 'Invalid username or password' });
         }
         
-        // Set session
+        // Generate JWT token
+        const token = jwt.sign(
+            { 
+                userId: user._id, 
+                username: user.username, 
+                role: user.role || 'user' 
+            },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+        
+        // Also set session for backward compatibility
         req.session.userId = user._id;
         req.session.username = user.username;
         req.session.role = user.role || 'user';
@@ -50,7 +64,7 @@ router.post('/login', async (req, res) => {
                 username: user.username,
                 role: user.role || 'user'
             },
-            token: 'session'
+            token: token
         });
     } catch (error) {
         console.error('❌ Login error:', error);
