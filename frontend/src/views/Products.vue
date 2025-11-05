@@ -49,6 +49,7 @@
 
 <script>
 import axios from 'axios'
+import { API_BASE_URL } from '../config/api'
 
 export default {
     name: 'Products',
@@ -71,7 +72,7 @@ export default {
         },
         async fetchProducts() {
             try {
-                const response = await axios.get('http://localhost:4000/api/products', {
+                const response = await axios.get(`${API_BASE_URL}/api/products`, {
                     withCredentials: true
                 })
                 this.products = response.data.data || []
@@ -81,7 +82,7 @@ export default {
         },
         async fetchCategories() {
             try {
-                const response = await axios.get('http://localhost:4000/api/categories', {
+                const response = await axios.get(`${API_BASE_URL}/api/categories`, {
                     withCredentials: true
                 })
                 this.categories = response.data.data || []
@@ -92,7 +93,7 @@ export default {
         async deleteProduct(id) {
             if (confirm('Are you sure you want to delete this product?')) {
                 try {
-                    await axios.delete(`http://localhost:4000/api/products/${id}`, {
+                    await axios.delete(`${API_BASE_URL}/api/products/${id}`, {
                         withCredentials: true
                     })
                     this.fetchProducts()
@@ -106,7 +107,7 @@ export default {
             if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
                 return imagePath
             }
-            return 'http://localhost:4000' + imagePath
+            return API_BASE_URL + imagePath
         },
         showAddModal() {},
         editProduct(product) {

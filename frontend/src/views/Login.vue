@@ -69,6 +69,7 @@
   
 </template><script>
 import axios from 'axios'
+import { API_BASE_URL } from '../config/api'
 
 export default {
     name: 'Login',
@@ -119,7 +120,7 @@ export default {
             try {
                 this.isLoading = true
                 const res = await axios.post(
-                    'http://localhost:4000/api/login',
+                    `${API_BASE_URL}/api/login`,
                     { username: this.username, password: this.password },
                     { withCredentials: true }
                 )

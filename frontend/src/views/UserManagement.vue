@@ -43,6 +43,7 @@
 
 <script>
 import axios from 'axios'
+import { API_BASE_URL } from '../config/api'
 
 export default {
   name: 'UserManagement',
@@ -57,7 +58,7 @@ export default {
   methods: {
     async fetchUsers() {
       try {
-        const response = await axios.get('http://localhost:4000/api/users', {
+        const response = await axios.get(`${API_BASE_URL}/api/users`, {
           withCredentials: true
         })
         this.users = response.data.data || []
@@ -69,7 +70,7 @@ export default {
     async deleteUser(id) {
       if (confirm('Are you sure you want to delete this user?')) {
         try {
-          await axios.delete(`http://localhost:4000/api/users/${id}`, {
+          await axios.delete(`${API_BASE_URL}/api/users/${id}`, {
             withCredentials: true
           })
           this.fetchUsers()
@@ -81,7 +82,7 @@ export default {
     async makeAdmin(id) {
       if (confirm('Make this user an admin?')) {
         try {
-          await axios.put(`http://localhost:4000/api/users/${id}/role`, {
+          await axios.put(`${API_BASE_URL}/api/users/${id}/role`, {
             role: 'admin'
           }, {
             withCredentials: true

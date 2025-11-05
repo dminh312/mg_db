@@ -87,6 +87,7 @@
 
 <script>
 import axios from 'axios'
+import { API_BASE_URL } from '../config/api'
 
 export default {
   name: 'Categories',
@@ -116,7 +117,7 @@ export default {
     },
     async fetchCategories() {
       try {
-        const response = await axios.get('http://localhost:4000/api/categories', {
+        const response = await axios.get(`${API_BASE_URL}/api/categories`, {
           withCredentials: true
         })
         console.log('✅ Categories API response:', response.data)
@@ -131,7 +132,7 @@ export default {
     async deleteCategory(id) {
       if (confirm('Are you sure you want to delete this category?')) {
         try {
-          await axios.delete(`http://localhost:4000/api/categories/${id}`, {
+          await axios.delete(`${API_BASE_URL}/api/categories/${id}`, {
             withCredentials: true
           })
           this.fetchCategories()
@@ -182,7 +183,7 @@ export default {
         if (this.isEditMode) {
           // Update existing category
           await axios.put(
-            `http://localhost:4000/api/categories/${this.categoryForm.id}`,
+            `${API_BASE_URL}/api/categories/${this.categoryForm.id}`,
             payload,
             { withCredentials: true }
           )
@@ -190,7 +191,7 @@ export default {
         } else {
           // Create new category
           await axios.post(
-            'http://localhost:4000/api/categories',
+            `${API_BASE_URL}/api/categories`,
             payload,
             { withCredentials: true }
           )
