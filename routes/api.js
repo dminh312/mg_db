@@ -90,7 +90,7 @@ router.post('/register', async (req, res) => {
 });
 
 // User management endpoints (admin only)
-router.get('/users', authMiddleware.ensureAdmin, async (req, res) => {
+router.get('/users', authMiddleware.ensureAdminAPI, async (req, res) => {
     try {
         const users = await UserModel.find({}, '-password');
         res.json({ success: true, data: users });
@@ -99,7 +99,7 @@ router.get('/users', authMiddleware.ensureAdmin, async (req, res) => {
     }
 });
 
-router.delete('/users/:id', authMiddleware.ensureAdmin, async (req, res) => {
+router.delete('/users/:id', authMiddleware.ensureAdminAPI, async (req, res) => {
     try {
         const user = await UserModel.findByIdAndDelete(req.params.id);
         if (!user) {
@@ -111,7 +111,7 @@ router.delete('/users/:id', authMiddleware.ensureAdmin, async (req, res) => {
     }
 });
 
-router.put('/users/:id/role', authMiddleware.ensureAdmin, async (req, res) => {
+router.put('/users/:id/role', authMiddleware.ensureAdminAPI, async (req, res) => {
     try {
         const { role } = req.body;
         const user = await UserModel.findByIdAndUpdate(
@@ -169,7 +169,7 @@ router.get('/categories/:id', async (req, res) => {
 });
 
 // POST /api/categories - Create new category (Admin only)
-router.post('/categories', authMiddleware.ensureAdmin, async (req, res) => {
+router.post('/categories', authMiddleware.ensureAdminAPI, async (req, res) => {
     try {
         const category = await CategoryModel.create(req.body);
         res.status(201).json({
@@ -187,7 +187,7 @@ router.post('/categories', authMiddleware.ensureAdmin, async (req, res) => {
 });
 
 // PUT /api/categories/:id - Update category (Admin only)
-router.put('/categories/:id', authMiddleware.ensureAdmin, async (req, res) => {
+router.put('/categories/:id', authMiddleware.ensureAdminAPI, async (req, res) => {
     try {
         const category = await CategoryModel.findByIdAndUpdate(
             req.params.id,
@@ -215,7 +215,7 @@ router.put('/categories/:id', authMiddleware.ensureAdmin, async (req, res) => {
 });
 
 // DELETE /api/categories/:id - Delete category (Admin only)
-router.delete('/categories/:id', authMiddleware.ensureAdmin, async (req, res) => {
+router.delete('/categories/:id', authMiddleware.ensureAdminAPI, async (req, res) => {
     try {
         const category = await CategoryModel.findByIdAndDelete(req.params.id);
         if (!category) {
@@ -284,16 +284,20 @@ router.get('/products/:id', async (req, res) => {
 });
 
 // POST /api/products - Create new product (Admin only)
-router.post('/products', authMiddleware.ensureAdmin, async (req, res) => {
+router.post('/products', authMiddleware.ensureAdminAPI, async (req, res) => {
     try {
+        console.log('📦 Creating product with data:', req.body);
         const product = await ProductModel.create(req.body);
+        console.log('✅ Product created:', product);
         const populatedProduct = await ProductModel.findById(product._id).populate('category');
+        console.log('✅ Product populated:', populatedProduct);
         res.status(201).json({
             success: true,
             message: 'Product created successfully',
             data: populatedProduct
         });
     } catch (error) {
+        console.error('❌ Error creating product:', error);
         res.status(400).json({
             success: false,
             message: 'Error creating product',
@@ -303,7 +307,7 @@ router.post('/products', authMiddleware.ensureAdmin, async (req, res) => {
 });
 
 // PUT /api/products/:id - Update product (Admin only)
-router.put('/products/:id', authMiddleware.ensureAdmin, async (req, res) => {
+router.put('/products/:id', authMiddleware.ensureAdminAPI, async (req, res) => {
     try {
         const product = await ProductModel.findByIdAndUpdate(
             req.params.id,
@@ -331,7 +335,7 @@ router.put('/products/:id', authMiddleware.ensureAdmin, async (req, res) => {
 });
 
 // DELETE /api/products/:id - Delete product (Admin only)
-router.delete('/products/:id', authMiddleware.ensureAdmin, async (req, res) => {
+router.delete('/products/:id', authMiddleware.ensureAdminAPI, async (req, res) => {
     try {
         const product = await ProductModel.findByIdAndDelete(req.params.id);
         if (!product) {

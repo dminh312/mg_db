@@ -111,7 +111,7 @@ export default {
         },
         showAddModal() {},
         editProduct(product) {
-            alert('Edit product modal - to be implemented')
+            this.$router.push(`/products/edit/${product._id}`)
         }
     }
 }

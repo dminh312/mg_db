@@ -3,6 +3,7 @@ import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Products from '../views/Products.vue'
 import AddProduct from '../views/AddProduct.vue'
+import EditProduct from '../views/EditProduct.vue'
 import Categories from '../views/Categories.vue'
 import UserManagement from '../views/UserManagement.vue'
 
@@ -31,6 +32,12 @@ const routes = [
     path: '/products/add',
     name: 'AddProduct',
     component: AddProduct,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/products/edit/:id',
+    name: 'EditProduct',
+    component: EditProduct,
     meta: { requiresAuth: true, requiresAdmin: true }
   },
   {

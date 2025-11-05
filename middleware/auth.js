@@ -23,5 +23,43 @@ module.exports = {
     // Not authenticated at all
     if (req && req.session) req.session.returnTo = req.originalUrl || '/';
     return res.redirect('/users/login');
+  },
+
+  // API-specific middleware - returns JSON instead of redirecting
+  ensureAuthenticatedAPI: function (req, res, next) {
+    if (req && req.session && req.session.userId) {
+      return next();
+    }
+    return res.status(401).json({
+      success: false,
+      message: 'Authentication required. Please login.'
+    });
+  },
+
+  ensureAdminAPI: function (req, res, next) {
+    console.log('🔒 Auth check - Session:', {
+      userId: req.session?.userId,
+      username: req.session?.username,
+      role: req.session?.role
+    });
+
+    if (!req.session || !req.session.userId) {
+      console.log('❌ No session found');
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required. Please login.'
+      });
+    }
+
+    if (req.session.role !== 'admin') {
+      console.log('❌ User is not admin:', req.session.role);
+      return res.status(403).json({
+        success: false,
+        message: 'Admin access required. You do not have permission.'
+      });
+    }
+
+    console.log('✅ Admin access granted');
+    return next();
   }
 };
