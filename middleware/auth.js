@@ -40,14 +40,22 @@ module.exports = {
     console.log('🔒 Auth check - Session:', {
       userId: req.session?.userId,
       username: req.session?.username,
-      role: req.session?.role
+      role: req.session?.role,
+      sessionID: req.sessionID,
+      cookies: req.cookies,
+      hasSession: !!req.session
     });
 
     if (!req.session || !req.session.userId) {
-      console.log('❌ No session found');
+      console.log('❌ No session found - Authentication required');
       return res.status(401).json({
         success: false,
-        message: 'Authentication required. Please login.'
+        message: 'Authentication required. Please login.',
+        debug: {
+          hasSession: !!req.session,
+          hasUserId: !!req.session?.userId,
+          sessionID: req.sessionID
+        }
       });
     }
 
@@ -55,11 +63,15 @@ module.exports = {
       console.log('❌ User is not admin:', req.session.role);
       return res.status(403).json({
         success: false,
-        message: 'Admin access required. You do not have permission.'
+        message: 'Admin access required. You do not have permission.',
+        debug: {
+          currentRole: req.session.role,
+          requiredRole: 'admin'
+        }
       });
     }
 
-    console.log('✅ Admin access granted');
+    console.log('✅ Admin access granted for:', req.session.username);
     return next();
   }
 };

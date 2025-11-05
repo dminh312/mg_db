@@ -9,10 +9,12 @@ var bcrypt = require('bcrypt');
 // Auth endpoints
 router.post('/login', async (req, res) => {
     try {
+        console.log('🔐 Login attempt for username:', req.body.username);
         const { username, password } = req.body;
         const user = await UserModel.findOne({ username });
         
         if (!user) {
+            console.log('❌ User not found:', username);
             return res.status(401).json({ success: false, message: 'Invalid username or password' });
         }
         
@@ -25,6 +27,7 @@ router.post('/login', async (req, res) => {
         }
         
         if (!match) {
+            console.log('❌ Invalid password for user:', username);
             return res.status(401).json({ success: false, message: 'Invalid username or password' });
         }
         
@@ -32,6 +35,13 @@ router.post('/login', async (req, res) => {
         req.session.userId = user._id;
         req.session.username = user.username;
         req.session.role = user.role || 'user';
+        
+        console.log('✅ Login successful:', {
+            userId: user._id,
+            username: user.username,
+            role: user.role,
+            sessionID: req.sessionID
+        });
         
         res.json({
             success: true,
@@ -43,6 +53,7 @@ router.post('/login', async (req, res) => {
             token: 'session'
         });
     } catch (error) {
+        console.error('❌ Login error:', error);
         res.status(500).json({ success: false, message: 'Login error', error: error.message });
     }
 });
@@ -287,10 +298,19 @@ router.get('/products/:id', async (req, res) => {
 router.post('/products', authMiddleware.ensureAdminAPI, async (req, res) => {
     try {
         console.log('📦 Creating product with data:', req.body);
+        console.log('📦 Request headers:', req.headers);
+        console.log('📦 Session info:', {
+            userId: req.session?.userId,
+            username: req.session?.username,
+            role: req.session?.role
+        });
+        
         const product = await ProductModel.create(req.body);
         console.log('✅ Product created:', product);
+        
         const populatedProduct = await ProductModel.findById(product._id).populate('category');
         console.log('✅ Product populated:', populatedProduct);
+        
         res.status(201).json({
             success: true,
             message: 'Product created successfully',
@@ -298,6 +318,7 @@ router.post('/products', authMiddleware.ensureAdminAPI, async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Error creating product:', error);
+        console.error('❌ Error stack:', error.stack);
         res.status(400).json({
             success: false,
             message: 'Error creating product',
@@ -309,23 +330,37 @@ router.post('/products', authMiddleware.ensureAdminAPI, async (req, res) => {
 // PUT /api/products/:id - Update product (Admin only)
 router.put('/products/:id', authMiddleware.ensureAdminAPI, async (req, res) => {
     try {
+        console.log('✏️ Updating product:', req.params.id);
+        console.log('✏️ Update data:', req.body);
+        console.log('✏️ Session info:', {
+            userId: req.session?.userId,
+            username: req.session?.username,
+            role: req.session?.role
+        });
+        
         const product = await ProductModel.findByIdAndUpdate(
             req.params.id,
             req.body,
             { new: true, runValidators: true }
         ).populate('category');
+        
         if (!product) {
+            console.log('❌ Product not found:', req.params.id);
             return res.status(404).json({
                 success: false,
                 message: 'Product not found'
             });
         }
+        
+        console.log('✅ Product updated:', product);
         res.json({
             success: true,
             message: 'Product updated successfully',
             data: product
         });
     } catch (error) {
+        console.error('❌ Error updating product:', error);
+        console.error('❌ Error stack:', error.stack);
         res.status(400).json({
             success: false,
             message: 'Error updating product',

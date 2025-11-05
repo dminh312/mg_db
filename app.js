@@ -40,17 +40,28 @@ app.use(express.static(path.join(__dirname, 'public')));
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// Session middleware
-app.use(session({
+// Session middleware - configured for production compatibility
+const sessionConfig = {
   secret: process.env.SESSION_SECRET || 'replace-this-with-a-strong-secret',
   resave: false,
   saveUninitialized: false,
+  name: 'dangcap.sid', // Custom cookie name
   cookie: { 
     maxAge: 24 * 60 * 60 * 1000, // 1 day
+    httpOnly: true, // Prevent XSS attacks
     secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // Allow cross-site cookies in production
   }
-}));
+};
+
+// Log session configuration
+console.log('🔧 Session config:', {
+  secure: sessionConfig.cookie.secure,
+  sameSite: sessionConfig.cookie.sameSite,
+  environment: process.env.NODE_ENV || 'development'
+});
+
+app.use(session(sessionConfig));
 
 
 
@@ -79,13 +90,31 @@ const allowedOrigins = [
   'http://localhost:5173', 
   'http://localhost:5174', 
   'http://localhost:5175',
-  process.env.CORS_ORIGIN // Vercel frontend URL
+  'https://mg-db.vercel.app',
+  'https://mg-db-git-main-dminh312s-projects.vercel.app',
+  process.env.CORS_ORIGIN // Additional Vercel frontend URL from env
 ].filter(Boolean);
 
+console.log('🌐 Allowed CORS origins:', allowedOrigins);
+
 const corsOptions = {
-  origin: allowedOrigins,
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, Postman, curl)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin is in allowed list or matches vercel.app domain
+    if (allowedOrigins.includes(origin) || origin.includes('vercel.app')) {
+      callback(null, true);
+    } else {
+      console.log('❌ CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
+
 app.use('/api', cors(corsOptions), apiRouter);
 
 // Server-rendered routes (disabled - Vue.js frontend handles these)
