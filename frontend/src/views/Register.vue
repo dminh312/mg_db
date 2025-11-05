@@ -82,8 +82,7 @@
 </template>
 
 <script>
-import axios from 'axios'
-import { API_BASE_URL } from '../config/api'
+import { apiClient, API_BASE_URL } from '../config/api'
 
 export default {
     name: 'Register',
@@ -131,11 +130,11 @@ export default {
 
             try {
                 this.isLoading = true
-                const res = await axios.post(`${API_BASE_URL}/api/register`, {
+                const res = await apiClient.post('/api/register', {
                     username: this.username,
                     password: this.password,
                     password2: this.password2
-                }, { withCredentials: true })
+                })
 
                 if (res.data?.success) {
                     this.success = 'Account created successfully. You can now log in.'

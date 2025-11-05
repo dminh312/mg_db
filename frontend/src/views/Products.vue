@@ -48,8 +48,7 @@
 </template>
 
 <script>
-import axios from 'axios'
-import { API_BASE_URL } from '../config/api'
+import { apiClient, API_BASE_URL } from '../config/api'
 
 export default {
     name: 'Products',
@@ -72,9 +71,7 @@ export default {
         },
         async fetchProducts() {
             try {
-                const response = await axios.get(`${API_BASE_URL}/api/products`, {
-                    withCredentials: true
-                })
+                const response = await apiClient.get('/api/products')
                 this.products = response.data.data || []
             } catch (err) {
                 console.error('Error loading products:', err)
@@ -82,9 +79,7 @@ export default {
         },
         async fetchCategories() {
             try {
-                const response = await axios.get(`${API_BASE_URL}/api/categories`, {
-                    withCredentials: true
-                })
+                const response = await apiClient.get('/api/categories')
                 this.categories = response.data.data || []
             } catch (err) {
                 console.error('Error loading categories:', err)
@@ -93,9 +88,7 @@ export default {
         async deleteProduct(id) {
             if (confirm('Are you sure you want to delete this product?')) {
                 try {
-                    await axios.delete(`${API_BASE_URL}/api/products/${id}`, {
-                        withCredentials: true
-                    })
+                    await apiClient.delete(`/api/products/${id}`)
                     this.fetchProducts()
                 } catch (err) {
                     alert('Error deleting product: ' + (err.response?.data?.message || err.message))

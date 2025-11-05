@@ -86,8 +86,7 @@
 </template>
 
 <script>
-import axios from 'axios'
-import { API_BASE_URL } from '../config/api'
+import { apiClient, API_BASE_URL } from '../config/api'
 
 export default {
   name: 'Categories',
@@ -117,9 +116,7 @@ export default {
     },
     async fetchCategories() {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/categories`, {
-          withCredentials: true
-        })
+        const response = await apiClient.get('/api/categories')
         console.log('✅ Categories API response:', response.data)
         this.categories = response.data.data || []
         console.log('✅ Categories loaded:', this.categories)
@@ -132,9 +129,7 @@ export default {
     async deleteCategory(id) {
       if (confirm('Are you sure you want to delete this category?')) {
         try {
-          await axios.delete(`${API_BASE_URL}/api/categories/${id}`, {
-            withCredentials: true
-          })
+          await apiClient.delete(`/api/categories/${id}`)
           this.fetchCategories()
         } catch (err) {
           alert('Error deleting category: ' + (err.response?.data?.message || err.message))
@@ -182,19 +177,11 @@ export default {
 
         if (this.isEditMode) {
           // Update existing category
-          await axios.put(
-            `${API_BASE_URL}/api/categories/${this.categoryForm.id}`,
-            payload,
-            { withCredentials: true }
-          )
+          await apiClient.put(`/api/categories/${this.categoryForm.id}`, payload)
           this.modalSuccess = 'Category updated successfully!'
         } else {
           // Create new category
-          await axios.post(
-            `${API_BASE_URL}/api/categories`,
-            payload,
-            { withCredentials: true }
-          )
+          await apiClient.post('/api/categories', payload)
           this.modalSuccess = 'Category created successfully!'
         }
 
