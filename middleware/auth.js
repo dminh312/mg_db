@@ -1,4 +1,3 @@
-// middleware/auth.js
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-production';
 
@@ -16,9 +15,9 @@ module.exports = {
       if (req.session.role === 'admin') {
         return next();
       }
-      return res.status(403).render('error', { 
-        message: 'Access Denied', 
-        error: { status: 403, stack: 'You do not have permission to access this resource.' }
+      return res.status(403).json({
+        success: false,
+        message: 'Access Denied'
       });
     }
     if (req && req.session) req.session.returnTo = req.originalUrl || '/';
@@ -50,16 +49,16 @@ module.exports = {
     if (token) {
       try {
         const decoded = jwt.verify(token, JWT_SECRET);
-        console.log('🔒 JWT Auth check:', decoded);
+        console.log('🔒 JWT Auth:', decoded.username, decoded.role);
         if (decoded.role !== 'admin') {
-          console.log('❌ User is not admin:', decoded.role);
+          console.log('❌ Not admin:', decoded.role);
           return res.status(403).json({
             success: false,
-            message: 'Admin access required. You do not have permission.'
+            message: 'Admin access required.'
           });
         }
         req.user = decoded;
-        console.log('✅ Admin access granted via JWT for:', decoded.username);
+        console.log('✅ Admin access granted:', decoded.username);
         return next();
       } catch (err) {
         console.log('❌ JWT verification failed:', err.message);
@@ -69,25 +68,23 @@ module.exports = {
         });
       }
     }
-    console.log('🔒 Session Auth check:', {
-      userId: req.session?.userId,
-      role: req.session?.role
-    });
+    
+    console.log('🔒 Session Auth:', req.session?.username, req.session?.role);
     if (!req.session || !req.session.userId) {
-      console.log('❌ No session found');
+      console.log('❌ No session');
       return res.status(401).json({
         success: false,
         message: 'Authentication required. Please login.'
       });
     }
     if (req.session.role !== 'admin') {
-      console.log('❌ User is not admin:', req.session.role);
+      console.log('❌ Not admin:', req.session.role);
       return res.status(403).json({
         success: false,
-        message: 'Admin access required. You do not have permission.'
+        message: 'Admin access required.'
       });
     }
-    console.log('✅ Admin access granted via session for:', req.session.username);
+    console.log('✅ Admin access granted:', req.session.username);
     return next();
   }
 };

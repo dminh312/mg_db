@@ -7,7 +7,6 @@
     "dev": "nodemon app.js"
   },
   "dependencies": {
-    "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "cookie-parser": "~1.4.4",
@@ -16,7 +15,6 @@
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
     "express-session": "^1.18.2",
-    "hbs": "^4.2.0",
     "http-errors": "~1.6.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.1",
