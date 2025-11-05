@@ -55,9 +55,25 @@ app.use(session({
 
 
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/home', homeRouter);
+// Web routes (disabled in production - frontend handles UI)
+// app.use('/', indexRouter);
+// app.use('/users', usersRouter);
+// app.use('/home', homeRouter);
+
+// Root endpoint for health check
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Dang Cap Market API Server',
+    status: 'running',
+    version: '1.0.0',
+    endpoints: {
+      auth: '/api/auth',
+      categories: '/api/categories',
+      products: '/api/products'
+    }
+  });
+});
+
 // RESTful API routes - enable CORS for cross-origin API requests
 const allowedOrigins = [
   'http://localhost:5173', 
@@ -71,9 +87,10 @@ const corsOptions = {
   credentials: true
 };
 app.use('/api', cors(corsOptions), apiRouter);
-// protect category and product routes so only logged-in users can access
-app.use('/category', authMiddleware.ensureAuthenticated, categoryRouter);
-app.use('/product', authMiddleware.ensureAuthenticated, productRouter);
+
+// Server-rendered routes (disabled - Vue.js frontend handles these)
+// app.use('/category', authMiddleware.ensureAuthenticated, categoryRouter);
+// app.use('/product', authMiddleware.ensureAuthenticated, productRouter);
 
 // catch 404 and forward to error handler
 // catch 404 and render a friendly 404 page
