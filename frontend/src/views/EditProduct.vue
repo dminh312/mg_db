@@ -74,8 +74,7 @@
 </template>
 
 <script>
-import axios from 'axios'
-import { API_BASE_URL } from '../config/api'
+import { apiClient, API_BASE_URL } from '../config/api'
 
 export default {
   name: 'EditProduct',
@@ -114,7 +113,7 @@ export default {
     },
     async fetchCategories() {
       try {
-        const res = await axios.get(`${API_BASE_URL}/api/categories`, { withCredentials: true })
+        const res = await apiClient.get('/api/categories')
         this.categories = res.data?.data || []
       } catch (err) {
         console.error('❌ Failed to load categories:', err)
@@ -124,7 +123,7 @@ export default {
     async fetchProduct() {
       try {
         const id = this.$route.params.id
-        const res = await axios.get(`${API_BASE_URL}/api/products/${id}`, { withCredentials: true })
+        const res = await apiClient.get(`/api/products/${id}`)
         const product = res.data?.data
         if (product) {
           this.name = product.name
@@ -151,7 +150,7 @@ export default {
         if (this.image) payload.image = this.image.trim()
         
         const id = this.$route.params.id
-        const res = await axios.put(`${API_BASE_URL}/api/products/${id}`, payload, { withCredentials: true })
+        const res = await apiClient.put(`/api/products/${id}`, payload)
         
         if (res.data?.success) {
           this.success = 'Product updated successfully'

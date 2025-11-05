@@ -72,8 +72,7 @@
 </template>
 
 <script>
-import axios from 'axios'
-import { API_BASE_URL } from '../config/api'
+import { apiClient, API_BASE_URL } from '../config/api'
 
 export default {
   name: 'AddProduct',
@@ -110,7 +109,7 @@ export default {
     },
     async fetchCategories() {
       try {
-        const res = await axios.get(`${API_BASE_URL}/api/categories`, { withCredentials: true })
+        const res = await apiClient.get('/api/categories')
         this.categories = res.data?.data || []
         console.log('✅ Categories loaded:', this.categories)
         console.log('✅ Number of categories:', this.categories.length)
@@ -134,7 +133,7 @@ export default {
         this.isLoading = true
         const payload = { name: this.name.trim(), price: this.price, category: this.category }
         if (this.image) payload.image = this.image.trim()
-        const res = await axios.post(`${API_BASE_URL}/api/products`, payload, { withCredentials: true })
+        const res = await apiClient.post('/api/products', payload)
         if (res.data?.success) {
           this.success = 'Product created'
           this.$router.push('/products')

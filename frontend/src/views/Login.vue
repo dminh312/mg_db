@@ -68,8 +68,7 @@
     </div>
   
 </template><script>
-import axios from 'axios'
-import { API_BASE_URL } from '../config/api'
+import { apiClient, API_BASE_URL } from '../config/api'
 
 export default {
     name: 'Login',
@@ -119,21 +118,25 @@ export default {
 
             try {
                 this.isLoading = true
-                const res = await axios.post(
-                    `${API_BASE_URL}/api/login`,
-                    { username: this.username, password: this.password },
-                    { withCredentials: true }
-                )
+                console.log('🔐 Attempting login...')
+                const res = await apiClient.post('/api/login', { 
+                    username: this.username, 
+                    password: this.password 
+                })
+
+                console.log('✅ Login response:', res.data)
 
                 if (res.data?.success) {
                     const token = res.data.token || 'session'
                     localStorage.setItem('token', token)
                     localStorage.setItem('user', JSON.stringify(res.data.user))
+                    console.log('✅ User saved to localStorage:', res.data.user)
                     this.$router.push('/products')
                 } else {
                     this.error = res.data?.message || 'Login failed.'
                 }
             } catch (err) {
+                console.error('❌ Login error:', err)
                 const data = err.response?.data
                 if (Array.isArray(data?.errors)) {
                     this.errors = data.errors
